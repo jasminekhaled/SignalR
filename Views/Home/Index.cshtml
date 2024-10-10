@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+
+<div>
+    <div style="margin-bottom: 15px;"> User Name <input id="userName" type="text" /> </div>
+
+    <div>
+        Message
+        <input id="Message" type="text" />
+        <button id="btn" onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+<hr />
+<ul id="messagesList"></ul>
+
+<script>
+
+    const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+    connection.start().catch(err => console.error(err.toString()));
+
+
+    // Function to send a message
+    function sendMessage() {
+        const user = document.getElementById("userName").value;
+        const message = document.getElementById("Message").value;
+        connection.invoke("SendMessage", user, message)
+            .catch(err => console.error(err.toString()));
+    }
+
+    // Receive messages from the hub
+    connection.on("ReceivedMessage", (user, message) => {
+        const msg = `${user}: ${message}`;
+        const li = document.createElement("li");
+        li.textContent = msg;
+        document.getElementById("messagesList").appendChild(li);
+    });
+
+</script>
